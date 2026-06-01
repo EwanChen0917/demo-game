@@ -1,0 +1,8 @@
+node_modules/
+dist/
+dist-electron/
+release/
+.playwright-mcp/
+*.png
+*.jpg
+.DS_Store
