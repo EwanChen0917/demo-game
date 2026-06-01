@@ -12,18 +12,32 @@
       </div>
       <div class="sidebar-footer">
         <button class="btn-tree" @click="showTree = true">族谱</button>
-        <button class="btn-season" @click="handleNextTurn">过一季</button>
+        <button
+          class="btn-season"
+          :class="{ blocked: hasPendingEvents }"
+          :disabled="hasPendingEvents"
+          @click="handleNextTurn"
+        >
+          {{ hasPendingEvents ? `待处理 ${store.pendingEvents.length}` : '过一季' }}
+        </button>
       </div>
     </div>
 
     <Teleport to="body">
       <FamilyTree v-if="showTree" @close="showTree = false" />
+      <EventModal
+        v-if="currentEvent"
+        :event="currentEvent"
+        :current="eventIndex + 1"
+        :total="store.pendingEvents.length + eventIndex"
+        @resolve="handleResolve"
+      />
     </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import Phaser from 'phaser'
 import { createGame } from '@/game'
 import { useGameStore } from '@/stores/game'
@@ -32,6 +46,7 @@ import MemberList from './family/MemberList.vue'
 import BirthPanel from './family/BirthPanel.vue'
 import ChieftainPanel from './family/ChieftainPanel.vue'
 import FamilyTree from './family/FamilyTree.vue'
+import EventModal from './EventModal.vue'
 
 const phaserContainer = ref<HTMLDivElement>()
 let game: Phaser.Game | null = null
@@ -39,9 +54,20 @@ let game: Phaser.Game | null = null
 const store = useGameStore()
 const selectedMemberId = ref<string | null>(null)
 const showTree = ref(false)
+const eventIndex = ref(0)
+
+const hasPendingEvents = computed(() => store.pendingEvents.length > 0)
+const currentEvent = computed(() => store.pendingEvents[0] ?? null)
 
 function handleNextTurn() {
+  if (hasPendingEvents.value) return
+  eventIndex.value = 0
   store.advanceSeason()
+}
+
+function handleResolve(eventId: string, choiceIndex: number) {
+  eventIndex.value++
+  store.resolveEvent(eventId, choiceIndex)
 }
 
 onMounted(() => {
@@ -128,9 +154,16 @@ onUnmounted(() => {
   border-radius: 4px;
   font-size: 16px;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, opacity 0.15s;
 }
 
-.btn-season:hover  { background: #dab97e; }
-.btn-season:active { background: #b8985e; }
+.btn-season:hover:not(.blocked)  { background: #dab97e; }
+.btn-season:active:not(.blocked) { background: #b8985e; }
+
+.btn-season.blocked {
+  background: #3a4a5a;
+  color: #8a9aba;
+  cursor: default;
+  opacity: 0.8;
+}
 </style>
