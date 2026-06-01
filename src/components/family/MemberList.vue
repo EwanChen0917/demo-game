@@ -67,6 +67,14 @@
               </div>
             </transition>
           </div>
+
+          <div v-if="canMarry(m)" class="marriage-section">
+            <div class="section-divider" />
+            <MarriagePanel :member="m" @done="marriageDone(m.id)" />
+          </div>
+          <div v-else-if="m.spouseIds.length > 0" class="spouse-tip">
+            配偶：{{ spouseNames(m) }}
+          </div>
         </div>
       </transition>
     </div>
@@ -74,9 +82,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { useFamilyStore, EXAM_STAGES, type ExamStage, type FamilyMember, type ExamResult } from '@/stores/family'
 import { OFFICIAL_RANKS, MILITARY_RANKS } from '@/data/officials'
+import MarriagePanel from './MarriagePanel.vue'
 
 defineProps<{ selectedId: string | null }>()
 const emit = defineEmits<{ select: [id: string] }>()
@@ -85,11 +94,30 @@ const familyStore = useFamilyStore()
 const allRanks = [...OFFICIAL_RANKS, ...MILITARY_RANKS]
 const examResults = reactive<Record<string, ExamResult | null>>({})
 const examDisplayStages = EXAM_STAGES.filter((s) => s !== '未参考')
+const marriageDoneIds = ref<Set<string>>(new Set())
 
 const aliveCount = computed(() => familyStore.family.members.filter((m) => m.alive).length)
 
 function isAging(m: FamilyMember): boolean {
   return m.alive && m.age >= m.lifespan - 10
+}
+
+function canMarry(m: FamilyMember): boolean {
+  return m.alive && m.isClanMember && m.age >= 16 && m.spouseIds.filter((sid) => {
+    const s = familyStore.family.members.find((x) => x.id === sid)
+    return s && s.alive
+  }).length === 0
+}
+
+function spouseNames(m: FamilyMember): string {
+  return m.spouseIds
+    .map((sid) => familyStore.family.members.find((x) => x.id === sid)?.name ?? '')
+    .filter(Boolean)
+    .join('、')
+}
+
+function marriageDone(id: string) {
+  marriageDoneIds.value = new Set([...marriageDoneIds.value, id])
 }
 
 function rankName(officialId: string): string {
@@ -344,4 +372,22 @@ function stageBadgeClass(stage: ExamStage): string {
 
 .result-fade-enter-active { transition: opacity 0.3s; }
 .result-fade-enter-from   { opacity: 0; }
+
+.section-divider {
+  height: 1px;
+  background: #2a3a5a;
+  margin: 4px 0;
+}
+
+.marriage-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.spouse-tip {
+  font-size: 11px;
+  color: #8a7a6a;
+  padding-top: 4px;
+}
 </style>

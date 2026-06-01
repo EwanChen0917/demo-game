@@ -51,6 +51,15 @@ const MALE_NAMES = ['伯远', '仲昌', '叔明', '季安', '文翰', '武骏', 
 const FEMALE_NAMES = ['如云', '芳华', '婉清', '秀兰', '玉莲', '琴心', '书语', '诗韵', '慧娴', '雅静']
 const SPOUSE_SURNAMES = ['李', '王', '张', '赵', '刘', '孙', '周', '吴', '郑', '冯']
 
+export interface MarriageCandidate {
+  name: string
+  gender: '男' | '女'
+  age: number
+  wenCai: number
+  wuLi: number
+  luck: number
+}
+
 export const useFamilyStore = defineStore('family', () => {
   const family = reactive({
     name: '陈' as string,
@@ -286,6 +295,44 @@ export const useFamilyStore = defineStore('family', () => {
     return msgs[currentStage]
   }
 
+  function generateCandidate(memberId: string): MarriageCandidate | null {
+    const m = family.members.find((x) => x.id === memberId)
+    if (!m || !m.alive) return null
+    const gender: '男' | '女' = m.gender === '男' ? '女' : '男'
+    const namePool = gender === '女' ? FEMALE_NAMES : MALE_NAMES
+    const surname = SPOUSE_SURNAMES[Math.floor(Math.random() * SPOUSE_SURNAMES.length)]
+    const givenName = namePool[Math.floor(Math.random() * namePool.length)]
+    return {
+      name: surname + givenName,
+      gender,
+      age: m.age - 2 + Math.floor(Math.random() * 5),
+      wenCai: 30 + Math.floor(Math.random() * 50),
+      wuLi: 20 + Math.floor(Math.random() * 50),
+      luck: 20 + Math.floor(Math.random() * 60),
+    }
+  }
+
+  function confirmMarriage(memberId: string, candidate: MarriageCandidate) {
+    const m = family.members.find((x) => x.id === memberId)
+    if (!m || !m.alive) return
+    const spouse = makeMember({
+      id: generateId(),
+      name: candidate.name,
+      gender: candidate.gender,
+      generation: m.generation,
+      age: candidate.age,
+      wenCai: candidate.wenCai,
+      wuLi: candidate.wuLi,
+      luck: candidate.luck,
+      isClanMember: false,
+      spouseIds: [m.id],
+    })
+    m.spouseIds.push(spouse.id)
+    family.members.push(spouse)
+    family.reputation += 5
+    seasonEvents.push({ type: 'birth', message: `${m.name} 与 ${spouse.name} 喜结连理，恭贺新婚！` })
+  }
+
   return {
     family,
     chieftainId,
@@ -298,6 +345,8 @@ export const useFamilyStore = defineStore('family', () => {
     onNewYear,
     onNewSeason,
     takeExam,
+    generateCandidate,
+    confirmMarriage,
   }
 })
 
