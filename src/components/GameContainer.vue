@@ -1,35 +1,47 @@
 <template>
-  <div class="game-layout">
+  <div class="game-root">
+    <WorldMap :mode="store.started ? 'view' : 'select'" @settled="onGameStarted" />
+
     <template v-if="store.started">
-      <div ref="phaserContainer" class="phaser-layer" />
-      <div class="ui-sidebar">
-        <div class="sidebar-scroll">
-          <InfoPanel />
-          <div class="divider" />
-          <ChieftainPanel />
-          <div class="divider" />
-          <BirthPanel />
-          <MemberList :selected-id="selectedMemberId" @select="selectedMemberId = $event" />
-        </div>
-        <div class="sidebar-footer">
-          <button class="btn-map" @click="showMap = true">地图</button>
-          <button class="btn-tree" @click="showTree = true">族谱</button>
-          <button
-            class="btn-season"
-            :class="{ blocked: hasPendingEvents }"
-            :disabled="hasPendingEvents"
-            @click="handleNextTurn"
-          >
-            {{ hasPendingEvents ? `待处理 ${store.pendingEvents.length}` : '过一季' }}
-          </button>
+      <div class="hud-top-left">
+        <div class="hud-family">{{ familyStore.family.name }}氏</div>
+        <div class="hud-stats">
+          <span>第 {{ store.year }} 年 · {{ store.season }}</span>
+          <span>声望 {{ familyStore.family.reputation }}</span>
+          <span>财富 {{ familyStore.family.wealth }}</span>
+          <span>族人 {{ aliveCount }}</span>
         </div>
       </div>
+
+      <div class="hud-top-right">
+        <button class="hud-btn" @click="showSidebar = !showSidebar">
+          {{ showSidebar ? '收起' : '族务' }}
+        </button>
+        <button class="hud-btn" @click="showTree = true">族谱</button>
+        <button
+          class="hud-btn hud-btn-season"
+          :class="{ blocked: hasPendingEvents }"
+          :disabled="hasPendingEvents"
+          @click="handleNextTurn"
+        >
+          {{ hasPendingEvents ? `待处理 ${store.pendingEvents.length}` : '过一季' }}
+        </button>
+      </div>
+
+      <transition name="sidebar-slide">
+        <div class="sidebar-drawer" v-if="showSidebar">
+          <div class="sidebar-inner">
+            <ChieftainPanel />
+            <div class="divider" />
+            <BirthPanel />
+            <MemberList :selected-id="selectedMemberId" @select="selectedMemberId = $event" />
+          </div>
+        </div>
+      </transition>
     </template>
 
     <Teleport to="body">
-      <MapSelectScreen v-if="!store.started" @started="onGameStarted" />
       <FamilyTree v-if="showTree" @close="showTree = false" />
-      <MapPanel v-if="showMap" @close="showMap = false" />
       <EventModal
         v-if="currentEvent"
         :event="currentEvent"
@@ -42,28 +54,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import Phaser from 'phaser'
-import { createGame } from '@/game'
+import { ref, computed } from 'vue'
 import { useGameStore } from '@/stores/game'
-import InfoPanel from './InfoPanel.vue'
+import { useFamilyStore } from '@/stores/family'
+import WorldMap from './WorldMap.vue'
 import MemberList from './family/MemberList.vue'
 import BirthPanel from './family/BirthPanel.vue'
 import ChieftainPanel from './family/ChieftainPanel.vue'
 import FamilyTree from './family/FamilyTree.vue'
-import MapPanel from './MapPanel.vue'
 import EventModal from './EventModal.vue'
-import MapSelectScreen from './MapSelectScreen.vue'
-
-const phaserContainer = ref<HTMLDivElement>()
-let game: Phaser.Game | null = null
 
 const store = useGameStore()
+const familyStore = useFamilyStore()
+
 const selectedMemberId = ref<string | null>(null)
 const showTree = ref(false)
-const showMap = ref(false)
+const showSidebar = ref(false)
 const eventIndex = ref(0)
 
+const aliveCount = computed(() => familyStore.family.members.filter((m) => m.alive).length)
 const hasPendingEvents = computed(() => store.pendingEvents.length > 0)
 const currentEvent = computed(() => store.pendingEvents[0] ?? null)
 
@@ -78,127 +87,132 @@ function handleResolve(eventId: string, choiceIndex: number) {
   store.resolveEvent(eventId, choiceIndex)
 }
 
-function initPhaser() {
-  if (phaserContainer.value && !game) {
-    game = createGame(phaserContainer.value)
-  }
-}
-
 function onGameStarted() {
-  // 选完出生地后 DOM 更新，等 tick 后挂载 Phaser
-  setTimeout(initPhaser, 50)
+  showSidebar.value = false
 }
-
-watch(() => store.started, (val) => {
-  if (val) setTimeout(initPhaser, 50)
-})
-
-onMounted(() => {
-  if (store.started) initPhaser()
-})
-
-onUnmounted(() => {
-  if (game) {
-    game.destroy(true)
-    game = null
-  }
-})
 </script>
 
 <style scoped>
-.game-layout {
-  display: flex;
+.game-root {
+  position: relative;
   width: 100%;
   height: 100%;
+  overflow: hidden;
+  font-family: 'Noto Serif SC', 'SimSun', serif;
 }
 
-.phaser-layer {
-  flex: 1;
-  min-width: 0;
-}
-
-.ui-sidebar {
-  width: 280px;
-  background: #16213e;
-  border-left: 1px solid #2a3a5a;
+.hud-top-left {
+  position: absolute;
+  top: 16px;
+  left: 16px;
   display: flex;
   flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+  z-index: 10;
 }
 
-.sidebar-scroll {
-  flex: 1;
+.hud-family {
+  font-size: 22px;
+  color: #f0d9b5;
+  letter-spacing: 3px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+}
+
+.hud-stats {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: #8a9aba;
+  background: rgba(6, 13, 26, 0.7);
+  padding: 5px 12px;
+  border-radius: 4px;
+  border: 1px solid #1a2a3a;
+}
+
+.hud-top-right {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.hud-btn {
+  padding: 8px 16px;
+  background: rgba(6, 13, 26, 0.85);
+  border: 1px solid #2a4a6a;
+  border-radius: 4px;
+  color: #8ab8d8;
+  font-size: 13px;
+  font-family: 'Noto Serif SC', serif;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  backdrop-filter: blur(4px);
+}
+
+.hud-btn:hover {
+  background: rgba(20, 40, 70, 0.9);
+  border-color: #4a8ab8;
+  color: #d0e8f8;
+}
+
+.hud-btn-season {
+  background: rgba(30, 20, 5, 0.9);
+  border-color: #8a6020;
+  color: #c8a060;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.hud-btn-season:hover:not(.blocked) {
+  background: rgba(50, 35, 8, 0.95);
+  border-color: #c8a040;
+  color: #f0c060;
+}
+
+.hud-btn-season.blocked {
+  background: rgba(20, 30, 40, 0.85);
+  border-color: #2a3a4a;
+  color: #4a6a7a;
+  cursor: default;
+}
+
+.sidebar-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 300px;
+  height: 100%;
+  background: rgba(8, 15, 30, 0.95);
+  border-left: 1px solid #1a2a4a;
+  z-index: 20;
+  backdrop-filter: blur(10px);
   overflow-y: auto;
+}
+
+.sidebar-inner {
   padding: 16px;
+  padding-top: 60px;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.sidebar-scroll::-webkit-scrollbar { width: 4px; }
-.sidebar-scroll::-webkit-scrollbar-thumb {
+.sidebar-inner::-webkit-scrollbar { width: 4px; }
+.sidebar-inner::-webkit-scrollbar-thumb {
   background: #2a3a5a;
   border-radius: 2px;
 }
 
 .divider {
   height: 1px;
-  background: #2a3a5a;
-}
-
-.sidebar-footer {
-  padding: 12px 16px;
-  border-top: 1px solid #2a3a5a;
-  display: flex;
-  gap: 6px;
-}
-
-.btn-map {
-  flex: 0 0 52px;
-  padding: 10px 0;
   background: #1a2a3a;
-  color: #6aacf0;
-  border: 1px solid #2a4a6a;
-  border-radius: 4px;
-  font-size: 13px;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
 }
 
-.btn-map:hover { background: #1a3a5a; border-color: #6aacf0; }
-
-.btn-tree {
-  flex: 0 0 52px;
-  padding: 10px 0;
-  background: #1a2a4a;
-  color: #c8a96e;
-  border: 1px solid #3a5a8a;
-  border-radius: 4px;
-  font-size: 13px;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-}
-
-.btn-tree:hover { background: #1f3a6a; border-color: #c8a96e; }
-
-.btn-season {
-  flex: 1;
-  padding: 10px 0;
-  background: #c8a96e;
-  color: #1a1a2e;
-  border: none;
-  border-radius: 4px;
-  font-size: 15px;
-  cursor: pointer;
-  transition: background 0.15s, opacity 0.15s;
-}
-
-.btn-season:hover:not(.blocked)  { background: #dab97e; }
-.btn-season:active:not(.blocked) { background: #b8985e; }
-
-.btn-season.blocked {
-  background: #3a4a5a;
-  color: #8a9aba;
-  cursor: default;
-  opacity: 0.8;
-}
+.sidebar-slide-enter-active { transition: transform 0.25s ease; }
+.sidebar-slide-leave-active { transition: transform 0.2s ease; }
+.sidebar-slide-enter-from   { transform: translateX(100%); }
+.sidebar-slide-leave-to     { transform: translateX(100%); }
 </style>

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap');
+
 * {
   margin: 0;
   padding: 0;
@@ -9,7 +11,7 @@ html, body {
   height: 100%;
   overflow: hidden;
   font-family: 'Noto Serif SC', 'SimSun', 'STSong', serif;
-  background: #1a1a2e;
+  background: #060d1a;
 }
 
 #app {
