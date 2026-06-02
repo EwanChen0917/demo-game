@@ -14,6 +14,7 @@ export const useGameStore = defineStore('game', () => {
   })
 
   const pendingEvents = ref<GameEvent[]>([])
+  const eventCooldowns = reactive<Record<string, number>>({})
 
   function buildEventContext() {
     return {
@@ -25,17 +26,29 @@ export const useGameStore = defineStore('game', () => {
 
   function drawEvents() {
     const ctx = buildEventContext()
-    const eligible = EVENTS.filter((e) => !e.condition || e.condition(ctx))
-    const totalWeight = eligible.reduce((s, e) => s + e.weight, 0)
-    const count = Math.random() < 0.6 ? 1 : Math.random() < 0.7 ? 2 : 0
+    const eligible = EVENTS.filter((e) => {
+      if (eventCooldowns[e.id] > 0) return false
+      return !e.condition || e.condition(ctx)
+    })
+
+    Object.keys(eventCooldowns).forEach((id) => {
+      if (eventCooldowns[id] > 0) eventCooldowns[id]--
+    })
+
+    const roll = Math.random()
+    const count = roll < 0.25 ? 0 : roll < 0.75 ? 1 : 2
+
     const drawn: GameEvent[] = []
     const usedIds = new Set<string>()
+    const totalWeight = eligible.reduce((s, e) => s + e.weight, 0)
+
     for (let i = 0; i < count; i++) {
-      let roll = Math.random() * totalWeight
+      if (eligible.length === 0) break
+      let r = Math.random() * totalWeight
       for (const evt of eligible) {
         if (usedIds.has(evt.id)) continue
-        roll -= evt.weight
-        if (roll <= 0) {
+        r -= evt.weight
+        if (r <= 0) {
           drawn.push(evt)
           usedIds.add(evt.id)
           break
@@ -51,6 +64,7 @@ export const useGameStore = defineStore('game', () => {
     const choice = evt.choices[choiceIndex]
     if (!choice) return
     choice.apply(buildEventContext())
+    eventCooldowns[eventId] = evt.cooldownSeasons ?? 8
     pendingEvents.value = pendingEvents.value.filter((e) => e.id !== eventId)
   }
 

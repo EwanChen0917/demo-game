@@ -21,6 +21,7 @@ export interface GameEvent {
   description: string
   condition?: (ctx: EventContext) => boolean
   weight: number
+  cooldownSeasons?: number
   choices: EventChoice[]
 }
 
@@ -32,6 +33,7 @@ export const EVENTS: GameEvent[] = [
     title: '名士来访',
     description: '一位饱学之士路过此地，听闻你家名声，登门拜访。此人学识渊博，与之深谈或可大有裨益。',
     weight: 10,
+    cooldownSeasons: 12,
     choices: [
       {
         label: '盛情款待，虚心求教',
@@ -64,6 +66,7 @@ export const EVENTS: GameEvent[] = [
     title: '饥荒赈济',
     description: '今年收成欠佳，流民涌入城中。官府号召各家大户捐粮赈灾，城中百姓翘首以盼。',
     weight: 8,
+    cooldownSeasons: 16,
     choices: [
       {
         label: '开仓放粮，慷慨赈济',
@@ -97,6 +100,7 @@ export const EVENTS: GameEvent[] = [
     title: '宅院失火',
     description: '深夜走水，宅院东厢遭受火灾。所幸家人无恙，但财物损失惨重。',
     weight: 6,
+    cooldownSeasons: 20,
     choices: [
       {
         label: '立即重建，修缮如初',
@@ -120,6 +124,7 @@ export const EVENTS: GameEvent[] = [
     title: '商队大捷',
     description: '家族商队此行运气极佳，在外地以低价购入稀缺货物，高价出售，获利颇丰。',
     weight: 9,
+    cooldownSeasons: 8,
     choices: [
       {
         label: '收入囊中',
@@ -143,6 +148,7 @@ export const EVENTS: GameEvent[] = [
     title: '官府加税',
     description: '新任知府为充军饷，下令辖区各家按资产额外缴纳赋税，态度强硬，不容推脱。',
     weight: 7,
+    cooldownSeasons: 12,
     choices: [
       {
         label: '如数缴纳，息事宁人',
@@ -166,6 +172,7 @@ export const EVENTS: GameEvent[] = [
     title: '风调雨顺',
     description: '今年天公作美，家族农庄粮食大丰收，仓廪充实，家丁欢呼雀跃。',
     weight: 10,
+    cooldownSeasons: 8,
     choices: [
       {
         label: '存粮备荒',
@@ -217,6 +224,7 @@ export const EVENTS: GameEvent[] = [
     title: '天资少年',
     description: '族中一名少年近日读书过目不忘，诗文出众，街坊四邻皆称其为神童，前途不可限量。',
     weight: 5,
+    cooldownSeasons: 16,
     condition: (ctx) => ctx.family.family.members.some((m) => m.alive && m.age < 15 && m.wenCai >= 65),
     choices: [
       {
@@ -325,6 +333,7 @@ export const EVENTS: GameEvent[] = [
     title: '梦授天书',
     description: '家中一名备考学子昨夜梦见一位白发仙翁，授以锦囊妙计，醒来后文思泉涌，奋笔疾书。',
     weight: 4,
+    cooldownSeasons: 20,
     condition: (ctx) => ctx.family.family.members.some((m) => m.alive && m.examStage !== '状元' && m.luck >= 60),
     choices: [
       {
@@ -354,6 +363,7 @@ export const EVENTS: GameEvent[] = [
     title: '修桥募捐',
     description: '乡里老桥年久失修，热心乡绅发起募捐，希望各家大户慷慨解囊，方便来往行人。',
     weight: 9,
+    cooldownSeasons: 20,
     choices: [
       {
         label: '大力捐助，带头示范',
@@ -385,6 +395,7 @@ export const EVENTS: GameEvent[] = [
     title: '游医登门',
     description: '一位游方郎中路过此地，声称擅长养生之道，可为族人调理体质，延年益寿。',
     weight: 6,
+    cooldownSeasons: 12,
     choices: [
       {
         label: '请其为年长族人诊治',
@@ -411,6 +422,7 @@ export const EVENTS: GameEvent[] = [
     title: '贵人相助',
     description: '家族在城中口碑颇佳，一位在朝官员念及旧情，托人捎来一笔银两，聊表心意。',
     weight: 5,
+    cooldownSeasons: 16,
     condition: (ctx) => ctx.family.family.reputation >= 60,
     choices: [
       {
