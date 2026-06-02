@@ -114,20 +114,20 @@ function onGameStarted() {
 
 .hud-family {
   font-size: 22px;
-  color: #f0d9b5;
+  color: #2a1a08;
   letter-spacing: 3px;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+  text-shadow: 0 1px 4px rgba(232, 220, 190, 0.8);
 }
 
 .hud-stats {
   display: flex;
   gap: 12px;
   font-size: 12px;
-  color: #8a9aba;
-  background: rgba(6, 13, 26, 0.7);
+  color: #5a3a1a;
+  background: rgba(232, 220, 190, 0.88);
   padding: 5px 12px;
   border-radius: 4px;
-  border: 1px solid #1a2a3a;
+  border: 1px solid #b09060;
 }
 
 .hud-top-right {
@@ -141,41 +141,42 @@ function onGameStarted() {
 
 .hud-btn {
   padding: 8px 16px;
-  background: rgba(6, 13, 26, 0.85);
-  border: 1px solid #2a4a6a;
-  border-radius: 4px;
-  color: #8ab8d8;
+  background: rgba(232, 220, 190, 0.92);
+  border: 1px solid #b09060;
+  border-radius: 3px;
+  color: #3a2010;
   font-size: 13px;
   font-family: 'Noto Serif SC', serif;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-  backdrop-filter: blur(4px);
+  transition: background 0.15s, border-color 0.15s;
+  letter-spacing: 1px;
+  box-shadow: 1px 1px 6px rgba(60, 30, 10, 0.2);
 }
 
 .hud-btn:hover {
-  background: rgba(20, 40, 70, 0.9);
-  border-color: #4a8ab8;
-  color: #d0e8f8;
+  background: rgba(220, 200, 160, 0.98);
+  border-color: #8a5020;
+  color: #1a0a00;
 }
 
 .hud-btn-season {
-  background: rgba(30, 20, 5, 0.9);
-  border-color: #8a6020;
-  color: #c8a060;
+  background: #8b1a0a;
+  border-color: #c84020;
+  color: #ffe8c0;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
 }
 
 .hud-btn-season:hover:not(.blocked) {
-  background: rgba(50, 35, 8, 0.95);
-  border-color: #c8a040;
-  color: #f0c060;
+  background: #a02010;
+  border-color: #e05030;
+  color: #fff0d0;
 }
 
 .hud-btn-season.blocked {
-  background: rgba(20, 30, 40, 0.85);
-  border-color: #2a3a4a;
-  color: #4a6a7a;
+  background: rgba(139, 96, 48, 0.2);
+  border-color: #b09060;
+  color: #8a7a5a;
   cursor: default;
 }
 
@@ -185,11 +186,11 @@ function onGameStarted() {
   right: 0;
   width: 300px;
   height: 100%;
-  background: rgba(8, 15, 30, 0.95);
-  border-left: 1px solid #1a2a4a;
+  background: rgba(232, 220, 190, 0.97);
+  border-left: 2px solid #b09060;
   z-index: 20;
-  backdrop-filter: blur(10px);
   overflow-y: auto;
+  box-shadow: -4px 0 20px rgba(60, 30, 10, 0.25);
 }
 
 .sidebar-inner {
