@@ -7,14 +7,20 @@ import { EVENTS, type GameEvent } from '@/data/events'
 export const useGameStore = defineStore('game', () => {
   const year = ref(1)
   const season = ref<'春' | '夏' | '秋' | '冬'>('春')
+  const started = ref(false)
 
-  const selectedTile = reactive({
-    x: -1,
-    y: -1,
-  })
+  const homeRegionId = ref<string | null>(null)
+  const controlledRegionIds = ref<string[]>([])
 
+  const selectedTile = reactive({ x: -1, y: -1 })
   const pendingEvents = ref<GameEvent[]>([])
   const eventCooldowns = reactive<Record<string, number>>({})
+
+  function startGame(regionId: string) {
+    homeRegionId.value = regionId
+    controlledRegionIds.value = [regionId]
+    started.value = true
+  }
 
   function buildEventContext() {
     return {
@@ -69,6 +75,7 @@ export const useGameStore = defineStore('game', () => {
   }
 
   function advanceSeason() {
+    if (!started.value) return
     const seasons: ('春' | '夏' | '秋' | '冬')[] = ['春', '夏', '秋', '冬']
     const idx = seasons.indexOf(season.value)
     const familyStore = useFamilyStore()
@@ -93,8 +100,12 @@ export const useGameStore = defineStore('game', () => {
   return {
     year,
     season,
+    started,
+    homeRegionId,
+    controlledRegionIds,
     selectedTile,
     pendingEvents,
+    startGame,
     advanceSeason,
     resolveEvent,
     selectTile,

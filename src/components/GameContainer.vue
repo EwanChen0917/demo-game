@@ -1,30 +1,35 @@
 <template>
   <div class="game-layout">
-    <div ref="phaserContainer" class="phaser-layer" />
-    <div class="ui-sidebar">
-      <div class="sidebar-scroll">
-        <InfoPanel />
-        <div class="divider" />
-        <ChieftainPanel />
-        <div class="divider" />
-        <BirthPanel />
-        <MemberList :selected-id="selectedMemberId" @select="selectedMemberId = $event" />
+    <template v-if="store.started">
+      <div ref="phaserContainer" class="phaser-layer" />
+      <div class="ui-sidebar">
+        <div class="sidebar-scroll">
+          <InfoPanel />
+          <div class="divider" />
+          <ChieftainPanel />
+          <div class="divider" />
+          <BirthPanel />
+          <MemberList :selected-id="selectedMemberId" @select="selectedMemberId = $event" />
+        </div>
+        <div class="sidebar-footer">
+          <button class="btn-map" @click="showMap = true">地图</button>
+          <button class="btn-tree" @click="showTree = true">族谱</button>
+          <button
+            class="btn-season"
+            :class="{ blocked: hasPendingEvents }"
+            :disabled="hasPendingEvents"
+            @click="handleNextTurn"
+          >
+            {{ hasPendingEvents ? `待处理 ${store.pendingEvents.length}` : '过一季' }}
+          </button>
+        </div>
       </div>
-      <div class="sidebar-footer">
-        <button class="btn-tree" @click="showTree = true">族谱</button>
-        <button
-          class="btn-season"
-          :class="{ blocked: hasPendingEvents }"
-          :disabled="hasPendingEvents"
-          @click="handleNextTurn"
-        >
-          {{ hasPendingEvents ? `待处理 ${store.pendingEvents.length}` : '过一季' }}
-        </button>
-      </div>
-    </div>
+    </template>
 
     <Teleport to="body">
+      <MapSelectScreen v-if="!store.started" @started="onGameStarted" />
       <FamilyTree v-if="showTree" @close="showTree = false" />
+      <MapPanel v-if="showMap" @close="showMap = false" />
       <EventModal
         v-if="currentEvent"
         :event="currentEvent"
@@ -37,7 +42,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import Phaser from 'phaser'
 import { createGame } from '@/game'
 import { useGameStore } from '@/stores/game'
@@ -46,7 +51,9 @@ import MemberList from './family/MemberList.vue'
 import BirthPanel from './family/BirthPanel.vue'
 import ChieftainPanel from './family/ChieftainPanel.vue'
 import FamilyTree from './family/FamilyTree.vue'
+import MapPanel from './MapPanel.vue'
 import EventModal from './EventModal.vue'
+import MapSelectScreen from './MapSelectScreen.vue'
 
 const phaserContainer = ref<HTMLDivElement>()
 let game: Phaser.Game | null = null
@@ -54,6 +61,7 @@ let game: Phaser.Game | null = null
 const store = useGameStore()
 const selectedMemberId = ref<string | null>(null)
 const showTree = ref(false)
+const showMap = ref(false)
 const eventIndex = ref(0)
 
 const hasPendingEvents = computed(() => store.pendingEvents.length > 0)
@@ -70,10 +78,23 @@ function handleResolve(eventId: string, choiceIndex: number) {
   store.resolveEvent(eventId, choiceIndex)
 }
 
-onMounted(() => {
-  if (phaserContainer.value) {
+function initPhaser() {
+  if (phaserContainer.value && !game) {
     game = createGame(phaserContainer.value)
   }
+}
+
+function onGameStarted() {
+  // 选完出生地后 DOM 更新，等 tick 后挂载 Phaser
+  setTimeout(initPhaser, 50)
+}
+
+watch(() => store.started, (val) => {
+  if (val) setTimeout(initPhaser, 50)
+})
+
+onMounted(() => {
+  if (store.started) initPhaser()
 })
 
 onUnmounted(() => {
@@ -128,17 +149,31 @@ onUnmounted(() => {
   padding: 12px 16px;
   border-top: 1px solid #2a3a5a;
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
+.btn-map {
+  flex: 0 0 52px;
+  padding: 10px 0;
+  background: #1a2a3a;
+  color: #6aacf0;
+  border: 1px solid #2a4a6a;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.btn-map:hover { background: #1a3a5a; border-color: #6aacf0; }
+
 .btn-tree {
-  flex: 0 0 72px;
+  flex: 0 0 52px;
   padding: 10px 0;
   background: #1a2a4a;
   color: #c8a96e;
   border: 1px solid #3a5a8a;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
 }
@@ -152,7 +187,7 @@ onUnmounted(() => {
   color: #1a1a2e;
   border: none;
   border-radius: 4px;
-  font-size: 16px;
+  font-size: 15px;
   cursor: pointer;
   transition: background 0.15s, opacity 0.15s;
 }
