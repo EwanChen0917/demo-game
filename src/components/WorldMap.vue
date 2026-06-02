@@ -9,7 +9,7 @@
     <svg
       ref="svgEl"
       class="map-svg"
-      viewBox="0 0 800 650"
+      viewBox="0 0 3200 2600"
       :style="{ transform: `translate(${pan.x}px, ${pan.y}px)` }"
     >
       <defs>
@@ -54,8 +54,11 @@
       </defs>
 
       <!-- 羊皮纸底色 -->
-      <rect x="0" y="0" width="800" height="650" fill="#e8dfc8" filter="url(#paper-texture)" rx="2"/>
-      <rect x="0" y="0" width="800" height="650" fill="#d4c9a8" fill-opacity="0.25"/>
+      <rect x="0" y="0" width="3200" height="2600" fill="#e8dfc8" filter="url(#paper-texture)" rx="4"/>
+      <rect x="0" y="0" width="3200" height="2600" fill="#d4c9a8" fill-opacity="0.25"/>
+
+      <!-- 地图外边框装饰 -->
+      <rect x="16" y="16" width="3168" height="2568" fill="none" stroke="#b09060" stroke-width="6" stroke-opacity="0.4" rx="8"/>
 
       <!-- 道疆域水墨色块 -->
       <g class="dao-layer">
@@ -66,11 +69,10 @@
           :fill="`url(#grad-${dp.name})`"
           :stroke="dp.color"
           stroke-opacity="0.5"
-          stroke-width="1.2"
+          stroke-width="4"
           stroke-linejoin="round"
           filter="url(#ink-blur)"
         />
-        <!-- 二次描边，毛笔感不规则边界 -->
         <path
           v-for="dp in daoPolygons"
           :key="`dao-stroke-${dp.name}`"
@@ -78,13 +80,13 @@
           fill="none"
           :stroke="dp.color"
           stroke-opacity="0.25"
-          stroke-width="2.5"
+          stroke-width="8"
           stroke-linejoin="round"
-          stroke-dasharray="6 3 2 3"
+          stroke-dasharray="20 10 6 10"
         />
       </g>
 
-      <!-- 道路连线（虚线，淡墨色） -->
+      <!-- 道路连线 -->
       <g class="roads-layer">
         <line
           v-for="(e, i) in edges"
@@ -92,9 +94,9 @@
           :x1="e.x1" :y1="e.y1"
           :x2="e.x2" :y2="e.y2"
           stroke="#8a7a5a"
-          stroke-opacity="0.25"
-          stroke-width="0.8"
-          stroke-dasharray="4 5"
+          stroke-opacity="0.22"
+          stroke-width="2"
+          stroke-dasharray="12 16"
         />
       </g>
 
@@ -108,38 +110,34 @@
           @click="onSelectRegion(r)"
           style="cursor: pointer"
         >
-          <!-- 选中光晕 -->
           <circle
             v-if="selectedId === r.id"
-            :r="sealR(r) + 8"
+            :r="sealR(r) + 28"
             fill="none"
             :stroke="selectedStroke(r)"
-            stroke-width="1.5"
-            stroke-dasharray="4 3"
+            stroke-width="4"
+            stroke-dasharray="14 10"
             opacity="0.8"
             filter="url(#select-glow)"
           />
 
-          <!-- 外圈（印章外框） -->
           <circle
             :r="sealR(r)"
             :fill="sealFill(r)"
             :stroke="sealStroke(r)"
-            :stroke-width="r.importance === 'capital' ? 2 : 1.2"
+            :stroke-width="r.importance === 'capital' ? 6 : 4"
             :filter="selectedId === r.id || r.id === gameStore.homeRegionId ? 'url(#seal-glow)' : ''"
           />
 
-          <!-- 内圈装饰（都城和重镇才有） -->
           <circle
             v-if="r.importance !== 'normal'"
-            :r="sealR(r) - 3"
+            :r="sealR(r) - 8"
             fill="none"
             :stroke="sealStroke(r)"
-            stroke-width="0.6"
+            stroke-width="2"
             stroke-opacity="0.6"
           />
 
-          <!-- 都城星标 -->
           <text
             v-if="r.importance === 'capital'"
             text-anchor="middle"
@@ -149,7 +147,6 @@
             pointer-events="none"
           >✦</text>
 
-          <!-- 重镇菱形 -->
           <rect
             v-else-if="r.importance === 'major'"
             :x="-sealR(r)*0.28"
@@ -161,7 +158,6 @@
             pointer-events="none"
           />
 
-          <!-- 普通州点 -->
           <circle
             v-else
             :r="sealR(r) * 0.3"
@@ -169,22 +165,18 @@
             pointer-events="none"
           />
 
-          <!-- 州名标注（竖向两字呈现感） -->
           <text
             text-anchor="middle"
-            :y="sealR(r) + 11"
+            :y="sealR(r) + 38"
             :font-size="fontSize(r)"
             :fill="labelColor(r)"
             :font-weight="r.importance === 'capital' ? '700' : '400'"
             pointer-events="none"
             class="city-label"
-            :letter-spacing="r.importance === 'capital' ? '2' : '1'"
+            :letter-spacing="r.importance === 'capital' ? '6' : '3'"
           >{{ r.name }}</text>
         </g>
       </g>
-
-      <!-- 地图外边框装饰 -->
-      <rect x="4" y="4" width="792" height="642" fill="none" stroke="#b09060" stroke-width="2" stroke-opacity="0.4" rx="2"/>
     </svg>
 
     <!-- 城池信息卡片（点击后浮出，非全高侧边栏） -->
@@ -319,9 +311,9 @@ const daoPolygons = computed<DaoPolygon[]>(() => {
 })
 
 function sealR(r: TangRegion): number {
-  if (r.importance === 'capital') return 11
-  if (r.importance === 'major') return 8
-  return 5
+  if (r.importance === 'capital') return 44
+  if (r.importance === 'major') return 32
+  return 20
 }
 
 function sealFill(r: TangRegion): string {
@@ -354,9 +346,9 @@ function sealTextColor(r: TangRegion): string {
 }
 
 function fontSize(r: TangRegion): number {
-  if (r.importance === 'capital') return 9
-  if (r.importance === 'major') return 8
-  return 7
+  if (r.importance === 'capital') return 36
+  if (r.importance === 'major') return 30
+  return 24
 }
 
 function labelColor(r: TangRegion): string {
@@ -403,8 +395,8 @@ function onSettle() {
 .world-map:active { cursor: grabbing; }
 
 .map-svg {
-  width: 800px;
-  height: 650px;
+  width: 3200px;
+  height: 2600px;
   display: block;
   will-change: transform;
 }
