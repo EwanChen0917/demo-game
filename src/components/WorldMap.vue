@@ -49,8 +49,8 @@
       </defs>
 
       <!-- 羊皮纸底色 -->
-      <rect x="100" y="100" width="700" height="500" fill="#e8dfc8" filter="url(#paper-texture)" rx="4"/>
-      <rect x="100" y="100" width="700" height="500" fill="#d4c9a8" fill-opacity="0.3"/>
+      <rect x="0" y="0" width="800" height="600" fill="#e8dfc8" filter="url(#paper-texture)" rx="4"/>
+      <rect x="0" y="0" width="800" height="600" fill="#d4c9a8" fill-opacity="0.3"/>
 
       <!-- 道疆域水墨色块 -->
       <g class="dao-layer">
@@ -180,11 +180,11 @@
 
       <!-- 地图标题 -->
       <text
-        x="450" y="130"
+        x="450" y="575"
         text-anchor="middle"
-        font-size="18"
+        font-size="16"
         fill="#5a3a1a"
-        opacity="0.5"
+        opacity="0.45"
         class="map-title-text"
         letter-spacing="8"
       >大唐疆域图</text>
@@ -255,7 +255,7 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive } from 'vue'
-import { TANG_REGIONS, DAO_COLORS, getRegionById, type TangRegion } from '@/data/map'
+import { TANG_REGIONS, DAO_COLORS, DAO_PATHS, getRegionById, type TangRegion } from '@/data/map'
 import { useGameStore } from '@/stores/game'
 import { useFamilyStore } from '@/stores/family'
 
@@ -278,8 +278,8 @@ const svgEl = ref<SVGSVGElement>()
 const viewBox = computed(() => {
   const w = 800 / zoom.value
   const h = 600 / zoom.value
-  const cx = 390 - pan.x / zoom.value
-  const cy = 275 - pan.y / zoom.value
+  const cx = 500 - pan.x / zoom.value
+  const cy = 400 - pan.y / zoom.value
   return `${cx - w/2} ${cy - h/2} ${w} ${h}`
 })
 
@@ -323,47 +323,12 @@ const edges = computed<Edge[]>(() => {
 
 interface DaoPolygon { name: string; color: string; path: string }
 const daoPolygons = computed<DaoPolygon[]>(() => {
-  const groups: Record<string, TangRegion[]> = {}
-  regions.forEach(r => {
-    if (!groups[r.dao]) groups[r.dao] = []
-    groups[r.dao].push(r)
-  })
-  return Object.entries(groups).map(([dao, pts]) => {
-    const hull = convexHull(pts.map(p => [p.x, p.y]))
-    const pad = 20
-    const expanded = hull.map(([x, y], i) => {
-      const prev = hull[(i - 1 + hull.length) % hull.length]
-      const next = hull[(i + 1) % hull.length]
-      const dx1 = x - prev[0], dy1 = y - prev[1]
-      const dx2 = next[0] - x, dy2 = next[1] - y
-      const nx = -(dy1 + dy2), ny = dx1 + dx2
-      const len = Math.sqrt(nx * nx + ny * ny) || 1
-      return [x + (nx / len) * pad, y + (ny / len) * pad]
-    })
-    const d = expanded.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ') + ' Z'
-    return { name: dao, color: DAO_COLORS[dao] ?? '#888', path: d }
-  })
+  return Object.entries(DAO_PATHS).map(([dao, path]) => ({
+    name: dao,
+    color: DAO_COLORS[dao] ?? '#888',
+    path,
+  }))
 })
-
-function convexHull(points: number[][]): number[][] {
-  if (points.length < 3) return points
-  const sorted = [...points].sort((a, b) => a[0] - b[0] || a[1] - b[1])
-  const lower: number[][] = []
-  for (const p of sorted) {
-    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop()
-    lower.push(p)
-  }
-  const upper: number[][] = []
-  for (const p of [...sorted].reverse()) {
-    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) upper.pop()
-    upper.push(p)
-  }
-  return [...lower.slice(0, -1), ...upper.slice(0, -1)]
-}
-
-function cross(o: number[], a: number[], b: number[]): number {
-  return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
-}
 
 function sealR(r: TangRegion): number {
   if (r.importance === 'capital') return 11
