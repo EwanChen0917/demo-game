@@ -1,7 +1,17 @@
-export interface TangRegion {
+export interface Province {
+  id: string
+  nameEn: string
+  nameZh: string
+  region: string
+  color: string
+  capital: string
+  description: string
+}
+
+export interface CityNode {
   id: string
   name: string
-  dao: string
+  provinceId: string
   x: number
   y: number
   importance: 'capital' | 'major' | 'normal'
@@ -9,457 +19,87 @@ export interface TangRegion {
   neighbors: string[]
 }
 
-export const TANG_REGIONS: TangRegion[] = [
-
-  // ── 关内道 ──────────────────────────────────────────
-  {
-    id: 'jingzhao',
-    name: '京兆',
-    dao: '关内道',
-    x: 1852, y: 1344,
-    importance: 'capital',
-    description: '大唐国都长安所在，天下第一繁华之地，科举取士之源。',
-    neighbors: ['huazhou', 'tongzhou', 'fengxiang', 'binzhou'],
-  },
-  {
-    id: 'huazhou',
-    name: '华州',
-    dao: '关内道',
-    x: 1908, y: 1328,
-    importance: 'normal',
-    description: '关中东门，扼守潼关要道，商旅往来频繁。',
-    neighbors: ['jingzhao', 'tongzhou', 'hezhong'],
-  },
-  {
-    id: 'tongzhou',
-    name: '同州',
-    dao: '关内道',
-    x: 1884, y: 1296,
-    importance: 'normal',
-    description: '关中北境，黄河渡口要津，农业富庶。',
-    neighbors: ['jingzhao', 'huazhou', 'yanzhou', 'hezhong'],
-  },
-  {
-    id: 'fengxiang',
-    name: '凤翔',
-    dao: '关内道',
-    x: 1776, y: 1328,
-    importance: 'major',
-    description: '西京陪都，关中西部重镇，历代屯兵之所。',
-    neighbors: ['jingzhao', 'binzhou', 'longzhou'],
-  },
-  {
-    id: 'binzhou',
-    name: '邠州',
-    dao: '关内道',
-    x: 1808, y: 1296,
-    importance: 'normal',
-    description: '泾水上游，农耕与游牧交界之地。',
-    neighbors: ['jingzhao', 'fengxiang', 'yanzhou'],
-  },
-
-  // ── 河南道 ──────────────────────────────────────────
-  {
-    id: 'luozhou',
-    name: '洛州',
-    dao: '河南道',
-    x: 2040, y: 1316,
-    importance: 'capital',
-    description: '东都洛阳，天下之中，丝路起点，百官辐辏。',
-    neighbors: ['hezhong', 'huazhou', 'ruzhou', 'bianzhou'],
-  },
-  {
-    id: 'hezhong',
-    name: '河中',
-    dao: '河南道',
-    x: 1936, y: 1276,
-    importance: 'major',
-    description: '黄河中游要冲，晋陕交界咽喉，兵家必争之地。',
-    neighbors: ['tongzhou', 'huazhou', 'luozhou', 'puzhou'],
-  },
-  {
-    id: 'bianzhou',
-    name: '汴州',
-    dao: '河南道',
-    x: 2132, y: 1312,
-    importance: 'major',
-    description: '运河枢纽，东西漕运要地，商业极盛。',
-    neighbors: ['luozhou', 'songzhou', 'caozhou'],
-  },
-  {
-    id: 'ruzhou',
-    name: '汝州',
-    dao: '河南道',
-    x: 2056, y: 1388,
-    importance: 'normal',
-    description: '中原腹地，连接南北要道。',
-    neighbors: ['luozhou', 'bianzhou', 'dengzhou'],
-  },
-  {
-    id: 'songzhou',
-    name: '宋州',
-    dao: '河南道',
-    x: 2204, y: 1336,
-    importance: 'normal',
-    description: '中原东部，淮河上游，农耕繁盛。',
-    neighbors: ['bianzhou', 'caozhou', 'chuzhou'],
-  },
-
-  // ── 河东道 ──────────────────────────────────────────
-  {
-    id: 'puzhou',
-    name: '蒲州',
-    dao: '河东道',
-    x: 1924, y: 1312,
-    importance: 'major',
-    description: '黄河东岸，晋地南门，古称河东要冲。',
-    neighbors: ['hezhong', 'jinzhou', 'luozhou'],
-  },
-  {
-    id: 'jinzhou',
-    name: '晋州',
-    dao: '河东道',
-    x: 1988, y: 1232,
-    importance: 'normal',
-    description: '汾水流域，山西中部，煤铁之乡。',
-    neighbors: ['puzhou', 'taiyuan', 'zezhou'],
-  },
-  {
-    id: 'taiyuan',
-    name: '太原',
-    dao: '河东道',
-    x: 2040, y: 1108,
-    importance: 'major',
-    description: '北都太原，李唐龙兴之地，北方军事重镇。',
-    neighbors: ['jinzhou', 'daizhou', 'yuzhou'],
-  },
-  {
-    id: 'daizhou',
-    name: '代州',
-    dao: '河东道',
-    x: 2060, y: 1032,
-    importance: 'normal',
-    description: '雁门关所在，抵御北方游牧的门户。',
-    neighbors: ['taiyuan', 'yuzhou'],
-  },
-  {
-    id: 'zezhou',
-    name: '泽州',
-    dao: '河东道',
-    x: 2056, y: 1264,
-    importance: 'normal',
-    description: '太行山西麓，连接晋豫要道。',
-    neighbors: ['jinzhou', 'puzhou', 'weizhou'],
-  },
-
-  // ── 河北道 ──────────────────────────────────────────
-  {
-    id: 'weizhou',
-    name: '魏州',
-    dao: '河北道',
-    x: 2172, y: 1208,
-    importance: 'major',
-    description: '河北南部重镇，安史之乱后割据藩镇之地。',
-    neighbors: ['zezhou', 'caozhou', 'mingzhou_hb', 'yuzhou'],
-  },
-  {
-    id: 'yuzhou',
-    name: '幽州',
-    dao: '河北道',
-    x: 2240, y: 980,
-    importance: 'major',
-    description: '北方军事重镇，安禄山起兵之地，扼守燕云要冲。',
-    neighbors: ['taiyuan', 'daizhou', 'mingzhou_hb', 'weizhou'],
-  },
-  {
-    id: 'mingzhou_hb',
-    name: '冀州',
-    dao: '河北道',
-    x: 2200, y: 1136,
-    importance: 'normal',
-    description: '华北平原腹地，农耕富庶之乡。',
-    neighbors: ['weizhou', 'yuzhou', 'caozhou'],
-  },
-  {
-    id: 'caozhou',
-    name: '曹州',
-    dao: '河北道',
-    x: 2188, y: 1284,
-    importance: 'normal',
-    description: '黄河北岸，豫北农业大州。',
-    neighbors: ['bianzhou', 'weizhou', 'mingzhou_hb', 'songzhou'],
-  },
-
-  // ── 淮南道 ──────────────────────────────────────────
-  {
-    id: 'yangzhou',
-    name: '扬州',
-    dao: '淮南道',
-    x: 2396, y: 1464,
-    importance: 'major',
-    description: '江南富庶第一州，扬一益二，商贾云集，文风鼎盛。',
-    neighbors: ['chuzhou', 'chuzhou2', 'suzhou'],
-  },
-  {
-    id: 'chuzhou',
-    name: '楚州',
-    dao: '淮南道',
-    x: 2376, y: 1388,
-    importance: 'normal',
-    description: '淮河入海口，漕运要道，盐业兴盛。',
-    neighbors: ['songzhou', 'yangzhou', 'chuzhou2'],
-  },
-  {
-    id: 'chuzhou2',
-    name: '滁州',
-    dao: '淮南道',
-    x: 2340, y: 1472,
-    importance: 'normal',
-    description: '淮南腹地，历来是南北拉锯之地。',
-    neighbors: ['chuzhou', 'yangzhou', 'shouzhou'],
-  },
-  {
-    id: 'shouzhou',
-    name: '寿州',
-    dao: '淮南道',
-    x: 2260, y: 1452,
-    importance: 'normal',
-    description: '淮河中游，屯粮重镇。',
-    neighbors: ['chuzhou2', 'dengzhou', 'ezhou'],
-  },
-
-  // ── 江南道 ──────────────────────────────────────────
-  {
-    id: 'suzhou',
-    name: '苏州',
-    dao: '江南道',
-    x: 2456, y: 1536,
-    importance: 'major',
-    description: '江南水乡，丝绸之府，富甲天下，文人墨客荟萃。',
-    neighbors: ['yangzhou', 'hangzhou', 'runzhou'],
-  },
-  {
-    id: 'hangzhou',
-    name: '杭州',
-    dao: '江南道',
-    x: 2436, y: 1604,
-    importance: 'major',
-    description: '钱塘江畔，江南繁华之地，后世南宋国都。',
-    neighbors: ['suzhou', 'runzhou', 'muzhou'],
-  },
-  {
-    id: 'runzhou',
-    name: '润州',
-    dao: '江南道',
-    x: 2400, y: 1480,
-    importance: 'normal',
-    description: '长江南岸，沟通苏杭要道。',
-    neighbors: ['suzhou', 'hangzhou', 'xuanzhou'],
-  },
-  {
-    id: 'xuanzhou',
-    name: '宣州',
-    dao: '江南道',
-    x: 2364, y: 1564,
-    importance: 'normal',
-    description: '皖南山地，文风颇盛，李白曾游历于此。',
-    neighbors: ['runzhou', 'shouzhou', 'hongzhou'],
-  },
-  {
-    id: 'hongzhou',
-    name: '洪州',
-    dao: '江南道',
-    x: 2216, y: 1704,
-    importance: 'major',
-    description: '江西重镇，王勃《滕王阁序》发源地，文华荟萃。',
-    neighbors: ['xuanzhou', 'ezhou', 'fuzhou_jn'],
-  },
-  {
-    id: 'fuzhou_jn',
-    name: '福州',
-    dao: '江南道',
-    x: 2388, y: 1876,
-    importance: 'normal',
-    description: '东南沿海，海贸兴盛，闽越之地。',
-    neighbors: ['hongzhou', 'guangzhou'],
-  },
-
-  // ── 剑南道 ──────────────────────────────────────────
-  {
-    id: 'yizhou',
-    name: '益州',
-    dao: '剑南道',
-    x: 1604, y: 1576,
-    importance: 'capital',
-    description: '成都所在，天府之国，富甲西南，扬一益二之"益"。',
-    neighbors: ['longzhou', 'zizhou', 'kuizhou', 'yazhou'],
-  },
-  {
-    id: 'zizhou',
-    name: '梓州',
-    dao: '剑南道',
-    x: 1652, y: 1552,
-    importance: 'normal',
-    description: '川中腹地，连接东西蜀道要冲。',
-    neighbors: ['yizhou', 'kuizhou', 'langzhou'],
-  },
-  {
-    id: 'kuizhou',
-    name: '夔州',
-    dao: '剑南道',
-    x: 1860, y: 1568,
-    importance: 'normal',
-    description: '长江三峡入口，杜甫客居之地，扼守入川门户。',
-    neighbors: ['zizhou', 'langzhou', 'ezhou'],
-  },
-
-  // ── 山南道 ──────────────────────────────────────────
-  {
-    id: 'xiangzhou',
-    name: '襄州',
-    dao: '山南道',
-    x: 2020, y: 1492,
-    importance: 'major',
-    description: '汉水中游，南北交通要冲，历代兵家重地。',
-    neighbors: ['dengzhou', 'jingzhou', 'ezhou', 'langzhou'],
-  },
-  {
-    id: 'dengzhou',
-    name: '邓州',
-    dao: '山南道',
-    x: 2020, y: 1448,
-    importance: 'normal',
-    description: '南阳盆地，连通中原与荆楚。',
-    neighbors: ['ruzhou', 'xiangzhou', 'shouzhou'],
-  },
-  {
-    id: 'jingzhou',
-    name: '荆州',
-    dao: '山南道',
-    x: 2024, y: 1604,
-    importance: 'major',
-    description: '长江中游，三国故地，控扼南北水道。',
-    neighbors: ['xiangzhou', 'ezhou', 'langzhou'],
-  },
-  {
-    id: 'ezhou',
-    name: '鄂州',
-    dao: '山南道',
-    x: 2132, y: 1584,
-    importance: 'normal',
-    description: '武昌所在，长江要津，商贸繁盛。',
-    neighbors: ['jingzhou', 'xiangzhou', 'hongzhou', 'kuizhou', 'shouzhou'],
-  },
-  {
-    id: 'langzhou',
-    name: '朗州',
-    dao: '山南道',
-    x: 1996, y: 1688,
-    importance: 'normal',
-    description: '湖南西北，沅水流域，柳宗元曾贬谪此地。',
-    neighbors: ['jingzhou', 'yizhou', 'zizhou', 'kuizhou', 'xiangzhou'],
-  },
-
-  // ── 陇右道 ──────────────────────────────────────────
-  {
-    id: 'longzhou',
-    name: '陇州',
-    dao: '陇右道',
-    x: 1748, y: 1304,
-    importance: 'normal',
-    description: '陇山东麓，连接关中与陇右的门户。',
-    neighbors: ['fengxiang', 'yizhou', 'lanzhouLD'],
-  },
-  {
-    id: 'lanzhouLD',
-    name: '兰州',
-    dao: '陇右道',
-    x: 1588, y: 1224,
-    importance: 'major',
-    description: '黄河要津，丝绸之路重镇，连接西域咽喉。',
-    neighbors: ['longzhou', 'liangzhou'],
-  },
-  {
-    id: 'liangzhou',
-    name: '凉州',
-    dao: '陇右道',
-    x: 1528, y: 1108,
-    importance: 'major',
-    description: '河西走廊东端，丝路重镇，多民族聚居之地。',
-    neighbors: ['lanzhouLD', 'guazhou'],
-  },
-  {
-    id: 'guazhou',
-    name: '瓜州',
-    dao: '陇右道',
-    x: 1176, y: 940,
-    importance: 'normal',
-    description: '敦煌附近，丝绸之路西出玉门关的最后一站。',
-    neighbors: ['liangzhou'],
-  },
-
-  // ── 岭南道 ──────────────────────────────────────────
-  {
-    id: 'guangzhou',
-    name: '广州',
-    dao: '岭南道',
-    x: 2080, y: 2068,
-    importance: 'major',
-    description: '南海之滨，海上丝绸之路起点，番商云集，富庶无比。',
-    neighbors: ['fuzhou_jn', 'guilin'],
-  },
-  {
-    id: 'guilin',
-    name: '桂州',
-    dao: '岭南道',
-    x: 1924, y: 1928,
-    importance: 'normal',
-    description: '岭南西部，山水奇秀，连接西南与岭南。',
-    neighbors: ['guangzhou', 'langzhou'],
-  },
-
-  // ── 东北 ──────────────────────────────────────────
-  {
-    id: 'yanzhou',
-    name: '延州',
-    dao: '关内道',
-    x: 1884, y: 1192,
-    importance: 'normal',
-    description: '延河流域，黄土高原腹地，边境军事重镇。',
-    neighbors: ['binzhou', 'tongzhou', 'taiyuan', 'daizhou'],
-  },
+export const PROVINCES: Province[] = [
+  { id: 'Beijing',      nameEn: 'Beijing',      nameZh: '北直隶', region: '京畿', color: '#8B4513', capital: 'beijing_city',   description: '天子脚下，首善之区，政治中心，百官辐辏。' },
+  { id: 'Tianjin',      nameEn: 'Tianjin',      nameZh: '天津',   region: '京畿', color: '#8B4513', capital: 'tianjin_city',   description: '京城门户，漕运要冲，海河入海之地。' },
+  { id: 'Hebei',        nameEn: 'Hebei',        nameZh: '河北',   region: '华北', color: '#DAA520', capital: 'baoding_city',   description: '华北平原，粮仓之地，历代兵家必争要地。' },
+  { id: 'Shanxi',       nameEn: 'Shanxi',       nameZh: '山西',   region: '华北', color: '#DAA520', capital: 'taiyuan_city',   description: '表里山河，晋商故里，煤铁之乡。' },
+  { id: 'Shandong',     nameEn: 'Shandong',     nameZh: '山东',   region: '华北', color: '#DAA520', capital: 'jinan_city',     description: '孔孟之乡，礼仪之邦，海岸线绵长。' },
+  { id: 'Henan',        nameEn: 'Henan',        nameZh: '河南',   region: '华北', color: '#DAA520', capital: 'kaifeng_city',   description: '中原腹地，天下之中，古都遍布，科举重镇。' },
+  { id: 'Neimenggu',    nameEn: 'Neimenggu',    nameZh: '漠南',   region: '漠南', color: '#BC8F5F', capital: 'hohhot_city',    description: '塞外草原，游牧之地，战略要冲。' },
+  { id: 'Liaoning',     nameEn: 'Liaoning',     nameZh: '辽东',   region: '东北', color: '#4682B4', capital: 'shenyang_city',  description: '辽东重镇，边疆锁钥，农牧交汇之地。' },
+  { id: 'Jilin',        nameEn: 'Jilin',        nameZh: '吉林',   region: '东北', color: '#4682B4', capital: 'jilin_city',     description: '白山黑水，山林茂密，东北腹地。' },
+  { id: 'Heilongjiang', nameEn: 'Heilongjiang', nameZh: '龙江',   region: '东北', color: '#4682B4', capital: 'harbin_city',    description: '黑龙江畔，极北之地，边境要塞。' },
+  { id: 'Shanghai',     nameEn: 'Shanghai',     nameZh: '松江',   region: '江南', color: '#20B2AA', capital: 'songjiang_city', description: '滨江重镇，商贸繁华，鱼米之乡。' },
+  { id: 'Jiangsu',      nameEn: 'Jiangsu',      nameZh: '南直隶', region: '江南', color: '#20B2AA', capital: 'nanjing_city',   description: '江南核心，金陵故都，文华荟萃，富甲天下。' },
+  { id: 'Zhejiang',     nameEn: 'Zhejiang',     nameZh: '浙江',   region: '江南', color: '#20B2AA', capital: 'hangzhou_city',  description: '湖光山色，丝绸之府，文人墨客云集之地。' },
+  { id: 'Anhui',        nameEn: 'Anhui',        nameZh: '安徽',   region: '江南', color: '#20B2AA', capital: 'hefei_city',     description: '皖山皖水，徽商故里，新安文化发源地。' },
+  { id: 'Fujian',       nameEn: 'Fujian',       nameZh: '福建',   region: '东南', color: '#3CB371', capital: 'fuzhou_city',    description: '八闽大地，海贸兴盛，山海相连。' },
+  { id: 'Jiangxi',      nameEn: 'Jiangxi',      nameZh: '江西',   region: '东南', color: '#3CB371', capital: 'nanchang_city',  description: '赣江流域，瓷都故里，科举人才辈出。' },
+  { id: 'Hubei',        nameEn: 'Hubei',        nameZh: '湖广北', region: '湖广', color: '#CD853F', capital: 'wuchang_city',   description: '荆楚大地，九省通衢，长江要冲。' },
+  { id: 'Hunan',        nameEn: 'Hunan',        nameZh: '湖广南', region: '湖广', color: '#CD853F', capital: 'changsha_city',  description: '湘江流域，鱼米之乡，山地丘陵连绵。' },
+  { id: 'Guangdong',    nameEn: 'Guangdong',    nameZh: '广东',   region: '两广', color: '#2E8B57', capital: 'guangzhou_city', description: '南海之滨，海上丝路起点，商贸最盛之地。' },
+  { id: 'Guangxi',      nameEn: 'Guangxi',      nameZh: '广西',   region: '两广', color: '#2E8B57', capital: 'guilin_city',    description: '桂林山水，西南门户，百越故地。' },
+  { id: 'Sichuan',      nameEn: 'Sichuan',      nameZh: '四川',   region: '西南', color: '#9370DB', capital: 'chengdu_city',   description: '天府之国，沃野千里，扬一益二之地。' },
+  { id: 'Chongqing',    nameEn: 'Chongqing',    nameZh: '重庆',   region: '西南', color: '#9370DB', capital: 'chongqing_city', description: '山城重庆，长江门户，西南商都。' },
+  { id: 'Guizhou',      nameEn: 'Guizhou',      nameZh: '贵州',   region: '西南', color: '#9370DB', capital: 'guiyang_city',   description: '黔地山多，少数民族聚居，风俗独特。' },
+  { id: 'Yunnan',       nameEn: 'Yunnan',       nameZh: '云南',   region: '西南', color: '#9370DB', capital: 'kunming_city',   description: '彩云之南，百族聚居，茶马古道起点。' },
+  { id: 'Shaanxi',      nameEn: 'Shaanxi',      nameZh: '陕西',   region: '西北', color: '#6B8E23', capital: 'xian_city',      description: '三秦大地，古都长安，丝路起点。' },
+  { id: 'Gansu',        nameEn: 'Gansu',        nameZh: '甘肃',   region: '西北', color: '#BC8F5F', capital: 'lanzhou_city',   description: '河西走廊，丝路要道，连接西域咽喉。' },
+  { id: 'Qinghai',      nameEn: 'Qinghai',      nameZh: '青海',   region: '西北', color: '#BC8F5F', capital: 'xining_city',    description: '高原之地，河湟谷地，青藏门户。' },
+  { id: 'Ningxia',      nameEn: 'Ningxia',      nameZh: '宁夏',   region: '西北', color: '#BC8F5F', capital: 'yinchuan_city',  description: '塞上江南，黄河流经，农牧交界之地。' },
+  { id: 'Xinjiang',     nameEn: 'Xinjiang',     nameZh: '西域',   region: '西北', color: '#BC8F5F', capital: 'urumqi_city',    description: '丝路西端，大漠绿洲，多民族聚居之地。' },
 ]
 
-export const DAO_COLORS: Record<string, string> = {
-  '关内道': '#8B4513',
-  '河南道': '#DAA520',
-  '河东道': '#6B8E23',
-  '河北道': '#4682B4',
-  '淮南道': '#20B2AA',
-  '江南道': '#3CB371',
-  '剑南道': '#9370DB',
-  '山南道': '#CD853F',
-  '陇右道': '#BC8F5F',
-  '岭南道': '#2E8B57',
+export const PROVINCE_REGIONS = ['京畿', '华北', '漠南', '东北', '江南', '东南', '湖广', '两广', '西南', '西北']
+
+export const CITIES: CityNode[] = [
+  { id: 'beijing_city',   name: '京师',   provinceId: 'Beijing',      x: 2141, y: 985,  importance: 'capital', description: '国都所在，天子脚下，科举取士之源，百官辐辏。',        neighbors: ['baoding_city', 'tianjin_city', 'taiyuan_city'] },
+  { id: 'tianjin_city',   name: '天津',   provinceId: 'Tianjin',      x: 2188, y: 1010, importance: 'major',   description: '京城门户，漕运要冲。',                                 neighbors: ['beijing_city', 'baoding_city'] },
+  { id: 'baoding_city',   name: '保定',   provinceId: 'Hebei',        x: 2118, y: 1038, importance: 'major',   description: '直隶重镇，京南门户。',                                 neighbors: ['beijing_city', 'shijiazhuang_city', 'jinan_city'] },
+  { id: 'shijiazhuang_city', name: '真定', provinceId: 'Hebei',       x: 2082, y: 1080, importance: 'normal',  description: '太行山麓，农业富庶之地。',                             neighbors: ['baoding_city', 'taiyuan_city', 'handan_city'] },
+  { id: 'handan_city',    name: '广平',   provinceId: 'Hebei',        x: 2065, y: 1128, importance: 'normal',  description: '冀南重镇，平原腹地。',                                 neighbors: ['shijiazhuang_city', 'kaifeng_city', 'taiyuan_city'] },
+  { id: 'taiyuan_city',   name: '太原',   provinceId: 'Shanxi',       x: 2019, y: 1061, importance: 'capital', description: '晋地之都，表里山河，历代军事重镇。',                     neighbors: ['beijing_city', 'datong_city', 'xian_city'] },
+  { id: 'datong_city',    name: '大同',   provinceId: 'Shanxi',       x: 2028, y: 998,  importance: 'major',   description: '九边重镇，抵御北方游牧的门户要塞。',                   neighbors: ['taiyuan_city', 'hohhot_city', 'beijing_city'] },
+  { id: 'hohhot_city',    name: '归化',   provinceId: 'Neimenggu',    x: 1988, y: 942,  importance: 'major',   description: '塞外重镇，游牧与农耕交界之地。',                       neighbors: ['datong_city', 'yinchuan_city'] },
+  { id: 'shenyang_city',  name: '沈阳',   provinceId: 'Liaoning',     x: 2336, y: 921,  importance: 'capital', description: '辽东重镇，东北边疆门户。',                             neighbors: ['beijing_city', 'jilin_city'] },
+  { id: 'jilin_city',     name: '吉林',   provinceId: 'Jilin',        x: 2390, y: 851,  importance: 'major',   description: '松花江畔，东北腹地。',                                 neighbors: ['shenyang_city', 'harbin_city'] },
+  { id: 'harbin_city',    name: '哈尔滨', provinceId: 'Heilongjiang', x: 2390, y: 780,  importance: 'major',   description: '黑龙江要津，极北边塞。',                               neighbors: ['jilin_city'] },
+  { id: 'jinan_city',     name: '济南',   provinceId: 'Shandong',     x: 2178, y: 1138, importance: 'capital', description: '泉城济南，齐鲁大地中心。',                             neighbors: ['baoding_city', 'kaifeng_city', 'nanjing_city'] },
+  { id: 'qingdao_city',   name: '青州',   provinceId: 'Shandong',     x: 2245, y: 1141, importance: 'normal',  description: '海滨重镇，商贸繁盛。',                                 neighbors: ['jinan_city'] },
+  { id: 'kaifeng_city',   name: '开封',   provinceId: 'Henan',        x: 2092, y: 1185, importance: 'capital', description: '七朝古都，中原腹地，黄河要冲。',                        neighbors: ['jinan_city', 'baoding_city', 'xian_city', 'wuchang_city', 'nanjing_city'] },
+  { id: 'luoyang_city',   name: '洛阳',   provinceId: 'Henan',        x: 2041, y: 1185, importance: 'major',   description: '九朝古都，天下之中。',                                 neighbors: ['kaifeng_city', 'xian_city'] },
+  { id: 'songjiang_city', name: '松江',   provinceId: 'Shanghai',     x: 2350, y: 1418, importance: 'major',   description: '棉纺之乡，江南商贸重地。',                             neighbors: ['nanjing_city', 'hangzhou_city'] },
+  { id: 'nanjing_city',   name: '金陵',   provinceId: 'Jiangsu',      x: 2260, y: 1397, importance: 'capital', description: '六朝古都，江南首府，文华荟萃之地。',                    neighbors: ['kaifeng_city', 'hangzhou_city', 'hefei_city', 'jinan_city'] },
+  { id: 'suzhou_city',    name: '苏州',   provinceId: 'Jiangsu',      x: 2325, y: 1412, importance: 'major',   description: '苏州府，天堂之城，丝绸产地，文人雅集之所。',            neighbors: ['nanjing_city', 'hangzhou_city', 'songjiang_city'] },
+  { id: 'hangzhou_city',  name: '杭州',   provinceId: 'Zhejiang',     x: 2310, y: 1467, importance: 'capital', description: '西子湖畔，人间天堂，丝茶之都。',                       neighbors: ['nanjing_city', 'suzhou_city', 'nanchang_city'] },
+  { id: 'ningbo_city',    name: '宁波',   provinceId: 'Zhejiang',     x: 2366, y: 1487, importance: 'major',   description: '东海商港，海贸重镇。',                                 neighbors: ['hangzhou_city', 'fuzhou_city'] },
+  { id: 'hefei_city',     name: '庐州',   provinceId: 'Anhui',        x: 2210, y: 1392, importance: 'normal',  description: '皖中重镇，淮南门户。',                                 neighbors: ['nanjing_city', 'kaifeng_city', 'wuchang_city'] },
+  { id: 'fuzhou_city',    name: '福州',   provinceId: 'Fujian',       x: 2329, y: 1568, importance: 'capital', description: '八闽首府，东南海疆重地。',                             neighbors: ['hangzhou_city', 'ningbo_city', 'nanchang_city'] },
+  { id: 'nanchang_city',  name: '南昌',   provinceId: 'Jiangxi',      x: 2215, y: 1496, importance: 'capital', description: '豫章故郡，洪都新府，赣江流域中心。',                   neighbors: ['hangzhou_city', 'fuzhou_city', 'wuchang_city', 'changsha_city', 'guangzhou_city'] },
+  { id: 'wuchang_city',   name: '武昌',   provinceId: 'Hubei',        x: 2138, y: 1456, importance: 'capital', description: '九省通衢，长江锁钥，兵家必争之地。',                   neighbors: ['kaifeng_city', 'nanchang_city', 'changsha_city', 'chongqing_city', 'hefei_city'] },
+  { id: 'changsha_city',  name: '长沙',   provinceId: 'Hunan',        x: 2084, y: 1545, importance: 'capital', description: '湘楚故都，楚汉文化发源地。',                           neighbors: ['wuchang_city', 'nanchang_city', 'guangzhou_city', 'guilin_city', 'guiyang_city'] },
+  { id: 'guangzhou_city', name: '广州',   provinceId: 'Guangdong',    x: 2082, y: 1680, importance: 'capital', description: '岭南都会，海上丝路起点，商贸最盛之地。',                neighbors: ['nanchang_city', 'changsha_city', 'guilin_city'] },
+  { id: 'guilin_city',    name: '桂林',   provinceId: 'Guangxi',      x: 1981, y: 1646, importance: 'capital', description: '桂林山水，西南门户重镇。',                             neighbors: ['changsha_city', 'guangzhou_city', 'guiyang_city', 'kunming_city'] },
+  { id: 'chengdu_city',   name: '成都',   provinceId: 'Sichuan',      x: 1838, y: 1488, importance: 'capital', description: '天府之国核心，扬一益二之"益"，物产丰饶。',             neighbors: ['xian_city', 'chongqing_city', 'guiyang_city', 'kunming_city'] },
+  { id: 'chongqing_city', name: '重庆',   provinceId: 'Chongqing',    x: 1950, y: 1518, importance: 'capital', description: '山城要塞，长江三峡门户，西南商都。',                   neighbors: ['chengdu_city', 'wuchang_city', 'guiyang_city'] },
+  { id: 'guiyang_city',   name: '贵阳',   provinceId: 'Guizhou',      x: 1950, y: 1617, importance: 'capital', description: '黔中要地，西南通衢。',                                 neighbors: ['chongqing_city', 'changsha_city', 'guilin_city', 'kunming_city'] },
+  { id: 'kunming_city',   name: '昆明',   provinceId: 'Yunnan',       x: 1845, y: 1667, importance: 'capital', description: '彩云之南，茶马古道枢纽，百族聚居之地。',               neighbors: ['chengdu_city', 'guiyang_city', 'guilin_city'] },
+  { id: 'xian_city',      name: '西安',   provinceId: 'Shaanxi',      x: 1942, y: 1206, importance: 'capital', description: '十三朝古都，丝绸之路起点，西北政治中心。',             neighbors: ['taiyuan_city', 'kaifeng_city', 'chengdu_city', 'lanzhou_city'] },
+  { id: 'lanzhou_city',   name: '兰州',   provinceId: 'Gansu',        x: 1793, y: 1180, importance: 'capital', description: '黄河要津，河西走廊东端，丝路咽喉。',                   neighbors: ['xian_city', 'xining_city', 'yinchuan_city', 'urumqi_city'] },
+  { id: 'xining_city',    name: '西宁',   provinceId: 'Qinghai',      x: 1731, y: 1255, importance: 'capital', description: '河湟谷地，青藏高原东北门户。',                         neighbors: ['lanzhou_city'] },
+  { id: 'yinchuan_city',  name: '银川',   provinceId: 'Ningxia',      x: 1890, y: 1094, importance: 'capital', description: '塞上江南，黄河之滨，西北要地。',                       neighbors: ['lanzhou_city', 'hohhot_city', 'xian_city'] },
+  { id: 'urumqi_city',    name: '乌鲁木齐', provinceId: 'Xinjiang',   x: 1353, y: 977,  importance: 'capital', description: '西域都护，丝路重镇，大漠绿洲。',                       neighbors: ['lanzhou_city'] },
+]
+
+export function getProvinceById(id: string): Province | undefined {
+  return PROVINCES.find(p => p.id === id)
 }
 
-export const DAO_PATHS: Record<string, string> = {
-  '关内道': 'M 1704,1244 L 1756,1012 L 1860,932 L 1960,1012 L 1908,1400 L 1960,1556 L 1860,1556 L 1756,1556 L 1704,1476 L 1704,1244 Z',
-  '陇右道': 'M 1704,1244 L 1756,1012 L 1704,932 L 1392,776 L 776,776 L 156,1168 L 876,1476 L 1340,2024 L 1600,2024 L 1600,1632 L 1756,1556 L 1704,1476 L 1704,1244 Z',
-  '河东道': 'M 1960,1012 L 2012,856 L 2116,932 L 2116,1244 L 2064,1400 L 2012,1400 L 1908,1400 L 1960,1012 Z',
-  '河北道': 'M 2012,856 L 2220,932 L 2476,1012 L 2476,1168 L 2528,1244 L 2376,1400 L 2324,1400 L 2116,1400 L 2064,1400 L 2116,1244 L 2116,932 L 2012,856 Z',
-  '河南道': 'M 1908,1400 L 2012,1400 L 2116,1400 L 2324,1400 L 2376,1400 L 2476,1556 L 2376,1556 L 2220,1556 L 2116,1632 L 2064,1556 L 2064,1400 L 2012,1400 L 1908,1400 Z',
-  '山南道': 'M 1756,1556 L 1860,1556 L 1960,1556 L 2064,1556 L 2116,1632 L 2116,1788 L 2012,1788 L 1860,1712 L 1756,1632 L 1600,1632 L 1756,1556 Z',
-  '淮南道': 'M 2116,1632 L 2220,1556 L 2376,1556 L 2476,1556 L 2528,1632 L 2476,1712 L 2376,1632 L 2272,1712 L 2116,1788 L 2116,1632 Z',
-  '江南道': 'M 2012,1788 L 2116,1788 L 2272,1712 L 2376,1632 L 2476,1712 L 2528,1868 L 2424,2256 L 2272,2256 L 2116,2256 L 1960,2176 L 2012,1788 Z',
-  '剑南道': 'M 1600,1632 L 1756,1632 L 1860,1712 L 2012,1788 L 1960,2176 L 1340,2024 L 1600,2024 L 1600,1632 Z',
-  '岭南道': 'M 1960,2176 L 2116,2256 L 2272,2256 L 2424,2256 L 2324,2412 L 2168,2488 L 1808,2488 L 1960,2176 Z',
+export function getCityById(id: string): CityNode | undefined {
+  return CITIES.find(c => c.id === id)
 }
 
-export function getRegionById(id: string): TangRegion | undefined {
-  return TANG_REGIONS.find((r) => r.id === id)
-}
-
-export function getRegionsByDao(dao: string): TangRegion[] {
-  return TANG_REGIONS.filter((r) => r.dao === dao)
+export function getCitiesByProvince(provinceId: string): CityNode[] {
+  return CITIES.filter(c => c.provinceId === provinceId)
 }
