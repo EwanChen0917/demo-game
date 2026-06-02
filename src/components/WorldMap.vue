@@ -1,12 +1,17 @@
 <template>
   <div
     class="world-map"
-    @wheel.prevent="onWheel"
+    @mousedown.prevent="onMouseDown"
     @mousemove="onMouseMove"
     @mouseup="onMouseUp"
     @mouseleave="onMouseUp"
   >
-    <svg ref="svgEl" class="map-svg" :viewBox="viewBox" @mousedown.prevent="onMouseDown">
+    <svg
+      ref="svgEl"
+      class="map-svg"
+      viewBox="0 0 800 650"
+      :style="{ transform: `translate(${pan.x}px, ${pan.y}px)` }"
+    >
       <defs>
         <!-- 羊皮纸纹理背景 -->
         <filter id="paper-texture" x="0%" y="0%" width="100%" height="100%">
@@ -49,8 +54,8 @@
       </defs>
 
       <!-- 羊皮纸底色 -->
-      <rect x="0" y="0" width="800" height="600" fill="#e8dfc8" filter="url(#paper-texture)" rx="4"/>
-      <rect x="0" y="0" width="800" height="600" fill="#d4c9a8" fill-opacity="0.3"/>
+      <rect x="0" y="0" width="800" height="650" fill="#e8dfc8" filter="url(#paper-texture)" rx="2"/>
+      <rect x="0" y="0" width="800" height="650" fill="#d4c9a8" fill-opacity="0.25"/>
 
       <!-- 道疆域水墨色块 -->
       <g class="dao-layer">
@@ -178,16 +183,8 @@
         </g>
       </g>
 
-      <!-- 地图标题 -->
-      <text
-        x="450" y="575"
-        text-anchor="middle"
-        font-size="16"
-        fill="#5a3a1a"
-        opacity="0.45"
-        class="map-title-text"
-        letter-spacing="8"
-      >大唐疆域图</text>
+      <!-- 地图外边框装饰 -->
+      <rect x="4" y="4" width="792" height="642" fill="none" stroke="#b09060" stroke-width="2" stroke-opacity="0.4" rx="2"/>
     </svg>
 
     <!-- 城池信息卡片（点击后浮出，非全高侧边栏） -->
@@ -270,21 +267,14 @@ const selectedId = ref<string | null>(null)
 const selected = computed(() => selectedId.value ? getRegionById(selectedId.value) ?? null : null)
 
 const pan = reactive({ x: 0, y: 0 })
-const zoom = ref(1)
 const dragging = ref(false)
+const didDrag = ref(false)
 const dragStart = reactive({ x: 0, y: 0, panX: 0, panY: 0 })
 const svgEl = ref<SVGSVGElement>()
 
-const viewBox = computed(() => {
-  const w = 800 / zoom.value
-  const h = 600 / zoom.value
-  const cx = 500 - pan.x / zoom.value
-  const cy = 400 - pan.y / zoom.value
-  return `${cx - w/2} ${cy - h/2} ${w} ${h}`
-})
-
 function onMouseDown(e: MouseEvent) {
   dragging.value = true
+  didDrag.value = false
   dragStart.x = e.clientX
   dragStart.y = e.clientY
   dragStart.panX = pan.x
@@ -293,16 +283,14 @@ function onMouseDown(e: MouseEvent) {
 
 function onMouseMove(e: MouseEvent) {
   if (!dragging.value) return
-  pan.x = dragStart.panX + (e.clientX - dragStart.x)
-  pan.y = dragStart.panY + (e.clientY - dragStart.y)
+  const dx = e.clientX - dragStart.x
+  const dy = e.clientY - dragStart.y
+  if (Math.abs(dx) > 3 || Math.abs(dy) > 3) didDrag.value = true
+  pan.x = dragStart.panX + dx
+  pan.y = dragStart.panY + dy
 }
 
 function onMouseUp() { dragging.value = false }
-
-function onWheel(e: WheelEvent) {
-  const delta = e.deltaY > 0 ? -0.1 : 0.1
-  zoom.value = Math.min(4, Math.max(0.4, zoom.value + delta))
-}
 
 interface Edge { x1: number; y1: number; x2: number; y2: number }
 const edges = computed<Edge[]>(() => {
@@ -388,6 +376,7 @@ function regionName(id: string): string {
 }
 
 function onSelectRegion(r: TangRegion) {
+  if (didDrag.value) return
   selectedId.value = selectedId.value === r.id ? null : r.id
 }
 
@@ -408,21 +397,19 @@ function onSettle() {
   overflow: hidden;
   user-select: none;
   font-family: 'Noto Serif SC', 'SimSun', serif;
-}
-
-.map-svg {
-  width: 100%;
-  height: 100%;
   cursor: grab;
 }
 
-.map-svg:active { cursor: grabbing; }
+.world-map:active { cursor: grabbing; }
 
-.city-label {
-  font-family: 'Noto Serif SC', 'SimSun', serif;
+.map-svg {
+  width: 800px;
+  height: 650px;
+  display: block;
+  will-change: transform;
 }
 
-.map-title-text {
+.city-label {
   font-family: 'Noto Serif SC', 'SimSun', serif;
 }
 
