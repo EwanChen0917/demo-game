@@ -8,8 +8,8 @@
   >
     <svg
       class="map-svg"
-      viewBox="0 0 3200 2600"
-      :style="{ transform: `translate(${pan.x}px, ${pan.y}px)` }"
+      :viewBox="viewBox"
+      preserveAspectRatio="xMidYMid meet"
     >
       <defs>
         <filter id="paper-texture" x="0%" y="0%" width="100%" height="100%">
@@ -41,37 +41,56 @@
       <rect x="0" y="0" width="3200" height="2600" fill="#d4c9a8" fill-opacity="0.2"/>
       <rect x="16" y="16" width="3168" height="2568" fill="none" stroke="#b09060" stroke-width="6" stroke-opacity="0.35" rx="8"/>
 
-      <!-- 省份疆域 -->
+      <!-- 省份疆域：统一浅填色 + 虚线边界 -->
       <g>
+        <!-- 浅色填充 -->
         <path
           v-for="prov in PROVINCES"
           :key="`fill-${prov.id}`"
           :d="provincePaths[prov.id] || ''"
-          :fill="prov.color"
-          fill-opacity="0.12"
+          fill="#c8a870"
+          fill-opacity="0.08"
           filter="url(#ink-blur)"
         />
+        <!-- 实线底描边（略细） -->
         <path
           v-for="prov in PROVINCES"
           :key="`border-${prov.id}`"
           :d="provincePaths[prov.id] || ''"
           fill="none"
-          :stroke="prov.color"
-          stroke-opacity="0.45"
-          stroke-width="3"
+          stroke="#7a5a30"
+          stroke-opacity="0.35"
+          stroke-width="2"
           stroke-linejoin="round"
         />
+        <!-- 虚线描边（水墨感） -->
         <path
           v-for="prov in PROVINCES"
           :key="`dash-${prov.id}`"
           :d="provincePaths[prov.id] || ''"
           fill="none"
-          :stroke="prov.color"
-          stroke-opacity="0.2"
-          stroke-width="6"
+          stroke="#5a3a10"
+          stroke-opacity="0.55"
+          stroke-width="3"
           stroke-linejoin="round"
-          stroke-dasharray="16 8 4 8"
+          stroke-dasharray="18 10 5 10"
         />
+        <!-- 省份名称标注 -->
+        <text
+          v-for="prov in PROVINCE_LABELS"
+          :key="`label-${prov.id}`"
+          :x="prov.labelX"
+          :y="prov.labelY"
+          text-anchor="middle"
+          dominant-baseline="central"
+          font-size="48"
+          fill="#6a4a20"
+          fill-opacity="0.45"
+          font-weight="400"
+          letter-spacing="6"
+          pointer-events="none"
+          class="province-label"
+        >{{ prov.id }}</text>
       </g>
 
       <!-- 城池节点 -->
@@ -80,7 +99,6 @@
         @click="onSelectCity(city)"
         style="cursor: pointer"
       >
-        <!-- 选中光晕 -->
         <circle
           v-if="selectedCityId === city.id"
           :r="sealR(city) + 24"
@@ -91,8 +109,6 @@
           opacity="0.9"
           filter="url(#select-glow)"
         />
-
-        <!-- 印章主体 -->
         <circle
           :r="sealR(city)"
           :fill="sealFill(city)"
@@ -100,8 +116,6 @@
           :stroke-width="city.importance === 'capital' ? 5 : 3"
           :filter="selectedCityId === city.id || city.id === gameStore.homeRegionId ? 'url(#seal-glow)' : ''"
         />
-
-        <!-- 内圈装饰 -->
         <circle
           v-if="city.importance !== 'normal'"
           :r="sealR(city) - 7"
@@ -110,8 +124,6 @@
           stroke-width="1.5"
           stroke-opacity="0.5"
         />
-
-        <!-- 都城星，重镇菱形，普通圆点 -->
         <text v-if="city.importance === 'capital'"
           text-anchor="middle" dominant-baseline="central"
           :font-size="sealR(city) * 0.85"
@@ -129,8 +141,6 @@
           :fill="sealTextColor(city)"
           pointer-events="none"
         />
-
-        <!-- 城池名称 -->
         <text
           text-anchor="middle"
           :y="sealR(city) + 34"
@@ -191,14 +201,6 @@
       点击城池，选择家族根基之地
     </div>
 
-    <div class="region-legend">
-      <div class="legend-title">大区</div>
-      <div v-for="region in uniqueRegions" :key="region" class="legend-row">
-        <span class="legend-dot" :style="{ background: regionColor(region) }"/>
-        <span>{{ region }}</span>
-      </div>
-     </div>
-
   </div>
 </template>
 
@@ -221,18 +223,49 @@ const selectedCity = computed(() =>
 
 const provincePaths = PROVINCE_PATHS
 
+const PROVINCE_LABELS = [
+  { id: '北直隶', labelX: 2330, labelY: 1028 },
+  { id: '辽东',   labelX: 2634, labelY: 894  },
+  { id: '山东',   labelX: 2380, labelY: 1200 },
+  { id: '山西',   labelX: 2020, labelY: 1120 },
+  { id: '陕西',   labelX: 1860, labelY: 1180 },
+  { id: '河南',   labelX: 2080, labelY: 1360 },
+  { id: '南直隶', labelX: 2320, labelY: 1540 },
+  { id: '浙江',   labelX: 2420, labelY: 1760 },
+  { id: '福建',   labelX: 2410, labelY: 1920 },
+  { id: '江西',   labelX: 2200, labelY: 1810 },
+  { id: '湖广',   labelX: 1980, labelY: 1640 },
+  { id: '广东',   labelX: 2140, labelY: 2060 },
+  { id: '广西',   labelX: 1800, labelY: 2020 },
+  { id: '四川',   labelX: 1680, labelY: 1540 },
+  { id: '贵州',   labelX: 1860, labelY: 1880 },
+  { id: '云南',   labelX: 1490, labelY: 1870 },
+]
+
 const pan = reactive({ x: 0, y: 0 })
 const dragging = ref(false)
 const didDrag = ref(false)
 const dragStart = reactive({ x: 0, y: 0, panX: 0, panY: 0 })
+
+const VB_W = 1800
+const VB_H = 1700
+const MAP_CENTER_X = 2105
+const MAP_CENTER_Y = 1511
+
+const viewBoxX = ref(MAP_CENTER_X - VB_W / 2)
+const viewBoxY = ref(MAP_CENTER_Y - VB_H / 2)
+
+const viewBox = computed(() =>
+  `${viewBoxX.value} ${viewBoxY.value} ${VB_W} ${VB_H}`
+)
 
 function onMouseDown(e: MouseEvent) {
   dragging.value = true
   didDrag.value = false
   dragStart.x = e.clientX
   dragStart.y = e.clientY
-  dragStart.panX = pan.x
-  dragStart.panY = pan.y
+  dragStart.panX = viewBoxX.value
+  dragStart.panY = viewBoxY.value
 }
 
 function onMouseMove(e: MouseEvent) {
@@ -240,8 +273,10 @@ function onMouseMove(e: MouseEvent) {
   const dx = e.clientX - dragStart.x
   const dy = e.clientY - dragStart.y
   if (Math.abs(dx) > 3 || Math.abs(dy) > 3) didDrag.value = true
-  pan.x = dragStart.panX + dx
-  pan.y = dragStart.panY + dy
+  const scaleX = VB_W / (document.documentElement.clientWidth || 1200)
+  const scaleY = VB_H / (document.documentElement.clientHeight || 800)
+  viewBoxX.value = dragStart.panX - dx * scaleX
+  viewBoxY.value = dragStart.panY - dy * scaleY
 }
 
 function onMouseUp() { dragging.value = false }
@@ -344,10 +379,13 @@ function onSettle() {
 .world-map:active { cursor: grabbing; }
 
 .map-svg {
-  width: 3200px;
-  height: 2600px;
+  width: 100%;
+  height: 100%;
   display: block;
-  will-change: transform;
+}
+
+.province-label {
+  font-family: 'Noto Serif SC', 'SimSun', serif;
 }
 
 .city-label {
