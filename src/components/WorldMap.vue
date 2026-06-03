@@ -42,7 +42,7 @@
       <rect x="16" y="16" width="3168" height="2568" fill="none" stroke="#b09060" stroke-width="6" stroke-opacity="0.35" rx="8"/>
 
       <!-- 省份疆域 -->
-      <g v-if="provincePaths">
+      <g>
         <path
           v-for="prov in PROVINCES"
           :key="`fill-${prov.id}`"
@@ -197,15 +197,14 @@
         <span class="legend-dot" :style="{ background: regionColor(region) }"/>
         <span>{{ region }}</span>
       </div>
-    </div>
+     </div>
 
-    <div v-if="!provincePaths" class="loading-hint">地图加载中…</div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, onMounted } from 'vue'
-import { PROVINCES, CITIES, getProvinceById, getCityById, type CityNode } from '@/data/map'
+import { ref, computed, reactive } from 'vue'
+import { PROVINCES, PROVINCE_PATHS, CITIES, getProvinceById, getCityById, type CityNode } from '@/data/map'
 import { useGameStore } from '@/stores/game'
 import { useFamilyStore } from '@/stores/family'
 
@@ -220,16 +219,7 @@ const selectedCity = computed(() =>
   selectedCityId.value ? getCityById(selectedCityId.value) ?? null : null,
 )
 
-const provincePaths = ref<Record<string, string> | null>(null)
-
-onMounted(async () => {
-  try {
-    const res = await fetch('/province-paths.json')
-    provincePaths.value = await res.json()
-  } catch (e) {
-    console.error('Failed to load province paths', e)
-  }
-})
+const provincePaths = PROVINCE_PATHS
 
 const pan = reactive({ x: 0, y: 0 })
 const dragging = ref(false)
@@ -300,7 +290,7 @@ function provinceColor(provinceId: string): string {
 }
 
 function provinceName(provinceId: string): string {
-  return getProvinceById(provinceId)?.nameZh ?? provinceId
+  return provinceId
 }
 
 function cityName(cityId: string): string {
